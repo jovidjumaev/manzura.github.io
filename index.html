@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Love Quiz App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(to right, #ffb3b3, #d9a7ff);
+      overflow: hidden;
+    }
+    .container {
+      text-align: center;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 10;
+      transition: all 0.3s ease-in-out;
+    }
+    .container:hover {
+      transform: scale(1.05);
+    }
+    .question {
+      font-size: 28px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .button-group button {
+      margin: 10px;
+      padding: 12px 25px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease-in-out;
+    }
+    .button-group button:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    }
+    .blue {
+      background: linear-gradient(to right, #007bff, #0056b3);
+      color: white;
+    }
+    .pink {
+      background: linear-gradient(to right, #ff69b4, #ff1493);
+      color: white;
+    }
+    .green {
+      background: linear-gradient(to right, #28a745, #1e7e34);
+      color: white;
+    }
+    .red {
+      background: linear-gradient(to right, #dc3545, #c82333);
+      color: white;
+    }
+    .no-button {
+      position: absolute;
+    }
+    .cat-gif {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      z-index: 1;
+      animation: bounce 3s infinite ease-in-out;
+    }
+    .cat-gif.top-left { top: 10px; left: 10px; }
+    .cat-gif.top-right { top: 10px; right: 10px; }
+    .cat-gif.bottom-left { bottom: 10px; left: 10px; }
+    .cat-gif.bottom-right { bottom: 10px; right: 10px; }
+    .cat-gif.center-top { top: 10px; left: 50%; transform: translateX(-50%); }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+  </style>
+  <script>
+    let stage = "name";
+    let name = "";
+    let currentQuestionIndex = 0;
+    let correctCount = 0;
+    const correctAnswers = {
+      'favorite-color': 'blue',
+      'date-night': 'stay-in-bed',
+      'romantic-gesture': 'flowers',
+      'favorite-animal': 'dog',
+      'weekend-activity': 'netflix-chill',
+      'cuisine': 'your-cooking',
+      'gift': 'rolls-royce',
+      'music': 'indian-songs'
+    };
+
+    const quizQuestions = [
+      {
+        key: 'favorite-color',
+        question: "Какой мой любимый цвет?",
+        options: [
+          { value: 'green', label: 'Зеленый', class: 'green' },
+          { value: 'blue', label: 'Синий', class: 'blue' },
+          { value: 'pink', label: 'Розовый', class: 'pink' },
+          { value: 'red', label: 'Красный', class: 'red' }
+        ]
+      },
+      {
+        key: 'date-night',
+        question: "Лучшее свидание?",
+        options: [
+          { value: 'movie-night', label: 'Ночь кино', class: 'green' },
+          { value: 'stay-in-bed', label: 'Остаться дома в постели', class: 'pink' },
+          { value: 'fancy-dinner', label: 'Изысканный ужин', class: 'blue' },
+          { value: 'adventure', label: 'Приключенческий поход', class: 'red' }
+        ]
+      },
+      {
+        key: 'romantic-gesture',
+        question: "Самый романтичный жест?",
+        options: [
+          { value: 'flowers', label: 'Цветы', class: 'green' },
+          { value: 'love-letter', label: 'Любовное письмо', class: 'pink' },
+          { value: 'surprise-gift', label: 'Неожиданный подарок', class: 'blue' },
+          { value: 'romantic-trip', label: 'Романтическое путешествие', class: 'red' }
+        ]
+      },
+      {
+        key: 'favorite-animal',
+        question: "Какое у меня любимое животное?",
+        options: [
+          { value: 'dog', label: 'Собака', class: 'green' },
+          { value: 'cat', label: 'Кошка', class: 'pink' },
+          { value: 'rabbit', label: 'Кролик', class: 'blue' },
+          { value: 'bird', label: 'Птица', class: 'red' }
+        ]
+      },
+      {
+        key: 'weekend-activity',
+        question: "Идеальная weekend-активность?",
+        options: [
+          { value: 'netflix-chill', label: 'Нетфликс и отдых', class: 'blue' },
+          { value: 'adventure', label: 'Приключенческий поход', class: 'red' },
+          { value: 'reading', label: 'Чтение вместе', class: 'green' },
+          { value: 'gaming', label: 'Марафон видеоигр', class: 'pink' }
+        ]
+      },
+      {
+        key: 'cuisine',
+        question: "Любимый тип кухни?",
+        options: [
+          { value: 'your-cooking', label: 'Твоя готовка', class: 'green' },
+          { value: 'italian', label: 'Итальянская', class: 'blue' },
+          { value: 'mexican', label: 'Мексиканская', class: 'red' },
+          { value: 'sushi', label: 'Суши', class: 'pink' }
+        ]
+      },
+      {
+        key: 'gift',
+        question: "Предпочтительный подарок?",
+        options: [
+          { value: 'rolls-royce', label: 'Роллс Ройс', class: 'blue' },
+          { value: 'jewelry', label: 'Ювелирные изделия', class: 'pink' },
+          { value: 'handmade', label: 'Ручная работа', class: 'green' },
+          { value: 'tech', label: 'Новейший гаджет', class: 'red' }
+        ]
+      },
+      {
+        key: 'music',
+        question: "Романтический музыкальный жанр?",
+        options: [
+          { value: 'indian-songs', label: 'Индийские песни', class: 'pink' },
+          { value: 'love-ballads', label: 'Любовные баллады', class: 'red' },
+          { value: 'indie-rock', label: 'Инди-рок', class: 'blue' },
+          { value: 'classical', label: 'Классическая музыка', class: 'green' }
+        ]
+      }
+    ];
+
+    function render() {
+      const container = document.getElementById('app');
+      container.innerHTML = `
+        <div class="container">
+          ${stage === 'name' ? nameStage() : ''}
+          ${stage === 'love-question' ? loveQuestionStage() : ''}
+          ${stage === 'quiz' ? quizStage() : ''}
+          ${stage === 'result' ? resultStage() : ''}
+        </div>
+        ${catGifs()}
+      `;
+    }
+
+    function catGifs() {
+      return `
+        <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2preWZlYnhqMnZ6aWJkdWJlOXBycTYwdmJwb2EyMHU4YTZkeWlieCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Q6WPVzFU8LcBWWgQE1/giphy-downsized-large.gif" class="cat-gif top-left" alt="cat gif" />
+        <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTl1Z3F2YWNldTN0cWNwdHB4d2hsbXptdHp2N2g5ZThva3U5dGRubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/DA8op0omzFuwe14iyj/giphy.gif" class="cat-gif top-right" alt="cat gif" />
+        <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExbW93YmJwY3Byanl1c2djMmEyeGJ2dTR0MmwxbTcwbXd1amlxbmlubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VbnUQpnihPSIgIXuZv/giphy.gif" class="cat-gif bottom-left" alt="cat gif" />
+        <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExbTZ6MnZhd3hpem4yeTRxenc1azExNXJtZzVxZnM2bjR6cTQ1MDZocyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ASvQ3A2Q7blzq/giphy.gif" class="cat-gif bottom-right" alt="cat gif" />
+        <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2Fydm5jdWptYmp2c3k1NHdtNW5ydXplNmN4MTU2d3p6N25lMGZobSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/CqVNwrLt9KEDK/giphy.gif" class="cat-gif center-top" alt="cat gif" />
+      `;
+    }
+
+    function nameStage() {
+      return `
+        <h1>Как тебя зовут?</h1>
+        <input type="text" id="nameInput" placeholder="Введите свое имя" />
+        <button onclick="askLoveQuestion()">Далее</button>
+      `;
+    }
+
+    function loveQuestionStage() {
+      return `
+        <h1>Ты меня любишь?</h1>
+        <div class="button-group">
+          <button class="green" onclick="startQuiz()">Да</button>
+          <button class="red no-button" onmouseover="moveNoButton(this)">Нет</button>
+        </div>
+      `;
+    }
+
+    function quizStage() {
+      const question = quizQuestions[currentQuestionIndex];
+      return `
+        <div class="question">${question.question}</div>
+        <div class="button-group">
+          ${question.options.map(option => `<button class="${option.class}" onclick="handleAnswer('${question.key}', '${option.value}')">${option.label}</button>`).join('')}
+        </div>
+      `;
+    }
+
+    function resultStage() {
+      const score = calculateScore();
+      let message = "";
+      if (score < 50) {
+        message = "КУРЕ СА";
+      } else if (score >= 50 && score < 80) {
+        message = "ТЫ МЕНЯ РАЗОЧАРОВЫВАЕШЬ";
+      } else if (score >= 80 && score < 100) {
+        message = "БЛИЗКО";
+      } else {
+        message = "НУ НАКОНЕЦ-ТО";
+      }
+      return `
+        <h1>Результаты викторины!</h1>
+        <p>${name}, вот ваш результат:</p>
+        <p>${score}%</p>
+        <p>${message}</p>
+        ${score < 100 ? '<button onclick="retryQuiz()">Попробовать ещё раз</button>' : ''}
+      `;
+    }
+
+    function retryQuiz() {
+      stage = "quiz";
+      currentQuestionIndex = 0;
+      correctCount = 0;
+      render();
+    }
+
+    function askLoveQuestion() {
+      const nameInput = document.getElementById('nameInput');
+      name = nameInput.value;
+      if (name.trim() !== '') {
+        stage = "love-question";
+        render();
+      }
+    }
+
+    function startQuiz() {
+      stage = "quiz";
+      render();
+    }
+
+    function moveNoButton(button) {
+      const container = document.querySelector(".container");
+      const containerWidth = container.offsetWidth;
+      const containerHeight = container.offsetHeight;
+      const buttonWidth = button.offsetWidth;
+      const buttonHeight = button.offsetHeight;
+
+      const maxX = containerWidth - buttonWidth;
+      const maxY = containerHeight - buttonHeight;
+
+      let randomX = Math.random() * maxX - button.offsetLeft;
+      let randomY = Math.random() * maxY - button.offsetTop;
+
+      if (Math.abs(randomX) < 100 && Math.abs(randomY) < 100) {
+        randomX += 100;
+        randomY += 100;
+      }
+
+      button.style.transform = `translate(${randomX}px, ${randomY}px)`;
+    }
+
+    function handleAnswer(questionKey, answer) {
+      const correct = correctAnswers[questionKey];
+      if (answer === correct) {
+        correctCount++;
+      }
+
+      currentQuestionIndex++;
+
+      if (currentQuestionIndex < quizQuestions.length) {
+        render();
+      } else {
+        stage = "result";
+        render();
+      }
+    }
+
+    function calculateScore() {
+      const totalQuestions = quizQuestions.length;
+      return Math.round((correctCount / totalQuestions) * 100);
+    }
+
+    window.onload = render;
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>
